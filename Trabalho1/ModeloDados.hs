@@ -19,6 +19,7 @@ type Plantao = [(Horario, [Cuidado])]
 data Cuidado
   = Comprar Medicamento Quantidade
   | Medicar Medicamento
+  deriving (Eq)
 
 instance Show Cuidado where
   show (Comprar m q) = "Comprar " ++ Prelude.show q ++ " comprimido(s) do medicamento: " ++ m

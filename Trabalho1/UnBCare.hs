@@ -2,8 +2,11 @@ module UnBCare where
 
 -- Descomentar linha abaixo quando o import funcionar
 -- import ModeloDados
-import Data.List ( sort, sortBy )
+
 import Data.Function (on)
+import Data.List (sort, sortBy)
+import Data.Maybe
+
 -- ModeloDados: Início --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 type Medicamento = String
@@ -25,7 +28,7 @@ type Plantao = [(Horario, [Cuidado])]
 data Cuidado
   = Comprar Medicamento Quantidade
   | Medicar Medicamento
-  deriving(Eq) 
+  deriving (Eq)
 
 instance Show Cuidado where
   show (Comprar m q) = "Comprar " ++ Prelude.show q ++ " comprimido(s) do medicamento: " ++ m
@@ -139,7 +142,7 @@ plantaoValido0 =
     (22, [Medicar m3])
   ]
 
--- hors fora de ordem 
+-- hors fora de ordem
 plantaoInvalido1 :: Plantao
 plantaoInvalido1 =
   [ (6, [Medicar m2, Medicar m8]),
@@ -165,8 +168,6 @@ plantaoInvalido3 =
     (17, [Medicar m1, Comprar m1 30]),
     (22, [Medicar m3])
   ]
-
-
 
 -- hors repetidos
 plantaoInvalido4 :: Plantao
@@ -221,16 +222,16 @@ conjuntoCasosTeste1 = and [casoTeste1, casoTeste2, casoTeste3, casoTeste4]
 --testando tomarMedicamento
 casoTeste5 = tomarMedicamento m1 estoque1 == Just [(m1, 9), (m2, 5), (m3, 0)]
 
-casoTeste6 = tomarMedicamento m3 estoque1 == Nothing
+casoTeste6 = isNothing (tomarMedicamento m3 estoque1)
 
-conjuntoCasosTeste2 = and [casoTeste5, casoTeste6]
+conjuntoCasosTeste2 = casoTeste5 && casoTeste6
 
 --testando consultarMedicamento
 casoTeste7 = consultarMedicamento m2 estoque1 == 5
 
 casoTeste8 = consultarMedicamento "Aas" estoque1 == 0
 
-conjuntoCasosTeste3 = and [casoTeste5, casoTeste6]
+conjuntoCasosTeste3 = casoTeste5 && casoTeste6
 
 -- testando demandaMedicamentos
 casoTeste9 = demandaMedicamentos receituario1 == [(m1, 2), (m2, 1), (m3, 1)]
@@ -242,23 +243,23 @@ casoTeste10 = geraPlanoReceituario receituario1 == [(6, [m2]), (8, [m1]), (17, [
 
 casoTeste11 = geraPlanoReceituario receituario2 == [(6, [m2]), (8, [m1, m4]), (17, [m1]), (22, [m3, m4]), (23, [m4])]
 
-conjuntoCasosTeste5 = and [casoTeste10, casoTeste11]
+conjuntoCasosTeste5 = casoTeste10 && casoTeste11
 
 -- testando geradores de plano e receituário
 casoTeste12 = geraReceituarioPlano (geraPlanoReceituario receituario1) == receituario1
 
 casoTeste13 = geraReceituarioPlano (geraPlanoReceituario receituario2) == receituario2
 
-conjuntoCasosTeste6 = and [casoTeste12, casoTeste13]
+conjuntoCasosTeste6 = casoTeste12 && casoTeste13
 
 -- testando executaPlantao
-casoTeste14 = executaPlantao plantao1 estoque1 == Nothing
+casoTeste14 = isNothing (executaPlantao plantao1 estoque1)
 
 casoTeste15 = executaPlantao plantao1 estoque2 == Just [(m1, 8), (m2, 4), (m3, 9)]
 
 casoTeste16 = executaPlantao plantao2 estoque1 == Just [(m1, 8), (m2, 4), (m3, 29)]
 
-conjuntoCasosTeste7 = and [casoTeste14, casoTeste15, casoTeste16]
+conjuntoCasosTeste7 = casoTeste14 && casoTeste15 && casoTeste16
 
 -- testando satisfaz
 casoTeste17 = not (satisfaz plantao1 plano1 estoque1)
@@ -267,7 +268,7 @@ casoTeste18 = satisfaz plantao1 plano1 estoque2
 
 casoTeste19 = satisfaz plantao2 plano1 estoque1
 
-conjuntoCasosTeste8 = and [casoTeste17, casoTeste18, casoTeste19]
+conjuntoCasosTeste8 = casoTeste17 && casoTeste18 && casoTeste19
 
 -- testando plantaoCorreto
 casoTeste21 = satisfaz plantao plano1 estoque1
@@ -294,12 +295,12 @@ resultadoGlobalTestes =
 -- testando plantaoValido
 conjuntoCasosTestePlantaoValido =
   and
-    [ plantaoValido plantao1 == True,
-      plantaoValido plantao2 == True,
-      plantaoValido plantaoValido0 == True,
-      plantaoValido plantaoInvalido1 == False,
-      plantaoValido plantaoInvalido2 == False,
-      plantaoValido plantaoInvalido3 == False
+    [ plantaoValido plantao1,
+      plantaoValido plantao2,
+      plantaoValido plantaoValido0,
+      not (plantaoValido plantaoInvalido1),
+      not (plantaoValido plantaoInvalido2),
+      not (plantaoValido plantaoInvalido3)
     ]
 
 -- Declarações: Final --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,8 +314,6 @@ conjuntoCasosTestePlantaoValido =
 ╚██████╔╝██║░╚███║██████╦╝  ╚█████╔╝██║░░██║██║░░██║███████╗
 ░╚═════╝░╚═╝░░╚══╝╚═════╝░  ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝
 
- 
- 
 O objetivo desse trabalho é fornecer apoio ao gerenciamento de cuidados a serem prestados a um paciente.
 O paciente tem um receituario médico, que indica os medicamentos a serem tomados com seus respectivos horários durante um dia.
 Esse receituário é organizado em um plano de medicamentos que estabelece, por horário, quais são os remédios a serem
@@ -326,7 +325,6 @@ Defina funções que simulem o comportamento descrito acima e que estejam de aco
 modelo de dados.
 
 -}
-
 
 {-
 
@@ -441,7 +439,7 @@ receituarioValido r
 recMedsOrdenados :: Receituario -> Bool
 recMedsOrdenados [] = True
 recMedsOrdenados r
-  | r == (ordenarMedsRec r) = True
+  | r == ordenarMedsRec r = True
   | otherwise = False
 
 ordenarMedsRec :: Receituario -> Receituario
@@ -460,8 +458,8 @@ receituarioNumMedsIguais mR r = length (filter ((== mR) . fst) r)
 
 recHorsDistintos :: Receituario -> Bool
 recHorsDistintos [] = True
-recHorsDistintos ((_, (hMed : hMedTail)) : tail)
-  | (receituarioNumHorsIguais (hMed : hMedTail)) == False = False
+recHorsDistintos ((_, hMed : hMedTail) : tail)
+  | not (receituarioNumHorsIguais (hMed : hMedTail)) = False
   | otherwise = recHorsDistintos tail
 
 receituarioNumHorsIguais :: [Horario] -> Bool
@@ -473,7 +471,7 @@ receituarioNumHorsIguais (hMed : hMedTail)
 recHorsOrdenados :: Receituario -> Bool
 recHorsOrdenados [] = True
 recHorsOrdenados r
-  | r == (ordenarHorsRec r) = True
+  | r == ordenarHorsRec r = True
   | otherwise = False
 
 ordenarHorsRec :: Receituario -> Receituario
@@ -484,18 +482,16 @@ ordenarHorsRec ((mR, hList) : tail) = (mR, sort hList) : ordenarHorsRec tail
 
 -- Funções de apoio para a função planoValido: begin
 
-
 planoValido :: PlanoMedicamento -> Bool
 planoValido [] = True
 planoValido p
   | planoHorsOrdenado p && planoHorsDistintos p && planoMedsDistintos p && planoMedsOrdenados p = True
   | otherwise = False
 
-
 planoHorsOrdenado :: PlanoMedicamento -> Bool
 planoHorsOrdenado [] = True
 planoHorsOrdenado p
-  | p == (ordenarHorsPlano p) = True
+  | p == ordenarHorsPlano p = True
   | otherwise = False
 
 ordenarHorsPlano :: PlanoMedicamento -> PlanoMedicamento
@@ -514,8 +510,8 @@ planoNumHorsIguais hP p = length (filter ((== hP) . fst) p)
 
 planoMedsDistintos :: PlanoMedicamento -> Bool
 planoMedsDistintos [] = True
-planoMedsDistintos ((_, (med : medTail)) : tail)
-  | (planoNumMedsIguais (med : medTail)) == False = False
+planoMedsDistintos ((_, med : medTail) : tail)
+  | not (planoNumMedsIguais (med : medTail)) = False
   | otherwise = planoMedsDistintos tail
 
 planoNumMedsIguais :: [Medicamento] -> Bool
@@ -524,11 +520,10 @@ planoNumMedsIguais (med : medTail)
   | length (filter (== med) (med : medTail)) > 1 = False
   | otherwise = planoNumMedsIguais medTail
 
-
 planoMedsOrdenados :: PlanoMedicamento -> Bool
 planoMedsOrdenados [] = True
 planoMedsOrdenados p
-  | p == (ordenarMedsPlano p) = True
+  | p == ordenarMedsPlano p = True
   | otherwise = False
 
 ordenarMedsPlano :: PlanoMedicamento -> PlanoMedicamento
@@ -574,43 +569,9 @@ plantaoHorsDistintos ((hPlantao, cList) : tail)
 
 plantaoNumHorsIguais :: Horario -> Plantao -> Int
 plantaoNumHorsIguais _ [] = 0
-plantaoNumHorsIguais hPlantao plantao = length (filter ((== hPlantao) . fst) plantao) 
+plantaoNumHorsIguais hPlantao plantao = length (filter ((== hPlantao) . fst) plantao)
 
 -- ITEM 1: End | ITEM 2: Beggining ------------------------------------------------------------------------------------------------
-
-plantaoSemConflito :: Plantao -> Bool
-plantaoSemConflito [] = True
-plantaoSemConflito ((_, cuidadoList) : tail)
-  | cuidadosSemConflito cuidadoList == False = False
-  | otherwise = plantaoSemConflito tail
-
-cuidadosSemConflito :: [Cuidado] -> Bool
-cuidadosSemConflito [] = True
-cuidadosSemConflito (cuidado : cuidadoTail) 
-  | cuidadoSemConflito cuidado (cuidado : cuidadoTail) == False = False
-  | otherwise = cuidadosSemConflito cuidadoTail
-
-cuidadoSemConflito :: [Cuidado] -> Bool
-cuidadoSemConflito [] = True
-cuidadoSemConflito (cuidado : cuidadoTail)
-  | repeticoesMedComprar cuidado (cuidado : cuidadoTail) > 0 &&
-    repeticoesMedMedicar cuidado (cuidado : cuidadoTail) > 0
-  = False
-  | otherwise = cuidadoSemConflito cuidadoTail
-
-repeticoesMedComprar :: Cuidado -> [Cuidado] -> Int
-repeticoesMedComprar _ [] = 0
-repeticoesMedComprar med1 ( Comprar med q: medTail) = 
-  length (filter (== med1) (removeQuantidadeDoComprar (Comprar med q : medTail)))
-
-repeticoesMedMedicar :: Cuidado -> [Cuidado] -> Int
-repeticoesMedMedicar _ [] = 0
-repeticoesMedMedicar med1 (med : medTail) =
-  length (filter (== med1) (med : medTail))
-
-removeQuantidadeDoComprar :: [Cuidado] -> [Medicamento]
-removeQuantidadeDoComprar [] = []
-removeQuantidadeDoComprar (Comprar med _ : medTail) = (med : removeQuantidadeDoComprar medTail)
 
 -- ITEM 2: End | ITEM 3: Beggining  ------------------------------------------------------------------------------------------------
 
@@ -628,7 +589,6 @@ removeQuantidadeDoComprar (Comprar med _ : medTail) = (med : removeQuantidadeDoC
 geraPlanoReceituario :: Receituario -> PlanoMedicamento
 geraPlanoReceituario = undefined
 
-
 {- QUESTÃO 8  VALOR: 1,0 ponto
 
  Defina a função "geraReceituarioPlano", cujo tipo é dado abaixo e que retorna um receituário válido a partir de um
@@ -642,12 +602,11 @@ geraPlanoReceituario = undefined
 geraReceituarioPlano :: PlanoMedicamento -> Receituario
 geraReceituarioPlano = undefined
 
-
 {-  QUESTÃO 9 VALOR: 1,0 ponto
 
 Defina a função "executaPlantao", cujo tipo é dado abaixo e que executa um plantão válido a partir de um estoque de medicamentos,
 resultando em novo estoque. A execução consiste em desempenhar, sequencialmente, todos os cuidados para cada horário do plantão.
-Caso o estoque acabe antes de terminar a execução do plantão, o resultado da função deve ser Nothing. Caso contrário, o resultado 
+Caso o estoque acabe antes de terminar a execução do plantão, o resultado da função deve ser Nothing. Caso contrário, o resultado
 deve ser Just v, onde v é o valor final do estoque de medicamentos
 
 -}
@@ -655,12 +614,11 @@ deve ser Just v, onde v é o valor final do estoque de medicamentos
 executaPlantao :: Plantao -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
 executaPlantao = undefined
 
-
 {-
 QUESTÃO 10 VALOR: 1,0 ponto
 
-Defina uma função "satisfaz", cujo tipo é dado abaixo e que verifica se um plantão válido satisfaz um plano 
-de medicamento válido para um certo estoque, ou seja, a função "satisfaz" deve verificar se a execução do plantão 
+Defina uma função "satisfaz", cujo tipo é dado abaixo e que verifica se um plantão válido satisfaz um plano
+de medicamento válido para um certo estoque, ou seja, a função "satisfaz" deve verificar se a execução do plantão
 implica terminar com estoque diferente de Nothing e administrar os medicamentos prescritos no plano.
 Dica: fazer correspondencia entre os remédios previstos no plano e os ministrados pela execução do plantão.
 Note que alguns cuidados podem ser comprar medicamento e que eles podem ocorrer sozinhos em certo horário ou
@@ -668,9 +626,8 @@ juntamente com ministrar medicamento.
 
 -}
 
-satisfaz :: Plantao -> PlanoMedicamento -> EstoqueMedicamentos  -> Bool
+satisfaz :: Plantao -> PlanoMedicamento -> EstoqueMedicamentos -> Bool
 satisfaz = undefined
-
 
 {-
 
@@ -682,6 +639,5 @@ QUESTÃO 11 (EXTRA) VALOR: 1,0 ponto
 
 -}
 
-plantaoCorreto :: PlanoMedicamento ->  EstoqueMedicamentos  -> Plantao
+plantaoCorreto :: PlanoMedicamento -> EstoqueMedicamentos -> Plantao
 plantaoCorreto = undefined
-

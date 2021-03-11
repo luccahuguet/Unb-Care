@@ -1,26 +1,8 @@
-module Exemplos where
+module Trabalho1.Exemplos where
 
 import Data.Maybe (isNothing)
-import ModeloDados
-  ( Cuidado (Comprar, Medicar),
-    EstoqueMedicamentos,
-    Medicamento,
-    PlanoMedicamento,
-    Plantao,
-    Receituario,
-  )
-import UnBCare
-  ( comprarMedicamento,
-    consultarMedicamento,
-    demandaMedicamentos,
-    executaPlantao,
-    geraPlanoReceituario,
-    geraReceituarioPlano,
-    plantaoCorreto,
-    plantaoValido,
-    satisfaz,
-    tomarMedicamento,
-  )
+import Trabalho1.ModeloDados
+import Trabalho1.UnBCare
 
 -- Declarações
 
@@ -254,3 +236,99 @@ conjuntoCasosTestePlantaoValido =
       not (plantaoValido plantaoInvalido2),
       not (plantaoValido plantaoInvalido3)
     ]
+
+
+---- My Tests -----
+
+---- Quase igual ao original kkk
+
+-- Questão 1 -> conjuntoCasosTeste1
+-- Questão 2 -> conjuntoCasosTeste2
+-- Questão 3 -> conjuntoCasosTeste3
+-- Questão 4 -> conjuntoCasosTeste4
+-- Questão 5 -> conjuntoCasosTeste5' (receituarioValido e planoValido)
+-- Questão 6 -> conjuntoCasosTeste6' (plantaoValido)
+-- Questão 7 -> conjuntoCasosTeste5
+-- Questão 8 -> conjuntoCasosTeste6
+-- Questão 9 -> conjuntoCasosTeste7
+
+-- Medicamento fora de ordem lexográfica
+receituarioInvalido1 :: Receituario
+receituarioInvalido1 = [(m2, [8, 17]), (m1, [6]), (m3, [22]), (m4, [8, 22, 23])]
+
+-- Medicamento Repetido
+receituarioInvalido2 :: Receituario
+receituarioInvalido2 = [(m1, [8, 17]), (m2, [6]), (m2, [7]), (m4, [8, 22, 23])]
+
+-- Horário fora de ordem crescente
+receituarioInvalido3 :: Receituario
+receituarioInvalido3 = [(m1, [8, 17]), (m2, [11, 7]), (m4, [8, 22, 23])]
+
+-- Horário repetido
+receituarioInvalido4 :: Receituario
+receituarioInvalido4 = [(m1, [8, 17]), (m2, [6, 6]), (m4, [8, 22, 23])]
+
+-- Horário fora de ordem crescente
+plano3 :: PlanoMedicamento
+plano3 = [(6, [m2]), (17, [m1]), (8, [m1]), (22, [m3])]
+
+-- Horário repetido
+plano4 :: PlanoMedicamento
+plano4 = [(6, [m2]), (17, [m1]), (17, [m1]), (22, [m3])]
+
+-- Medicamento fora de ordem lexográfica
+plano5 :: PlanoMedicamento
+plano5 = [(6, [m2]), (8, [m3, m1]), (17, [m1]), (22, [m3])]
+
+-- Medicamento Repetido
+plano6 :: PlanoMedicamento
+plano6 = [(6, [m2]), (8, [m1, m1]), (17, [m1]), (22, [m3])]
+
+planoValidoOK :: Bool
+planoValidoOK =
+  planoValido plano1 && planoValido plano2 && not (planoValido plano3)
+    && not (planoValido plano4)
+    && not (planoValido plano5)
+    && not (planoValido plano6)
+
+plantaoInvalido5 :: Plantao
+plantaoInvalido5 =
+  [ (6, [Medicar m2, Medicar m8]),
+    (8, [Medicar m9, Medicar m1]),
+    (8, [Medicar m1, Comprar m3 30]),
+    (22, [Medicar m3])
+  ]
+
+
+plantaoValidoOK :: Bool
+plantaoValidoOK =
+  plantaoValido plantao1 && plantaoValido plantao2 && plantaoValido plantaoValido0
+    && not (plantaoValido plantaoInvalido1)
+    && not (plantaoValido plantaoInvalido2)
+    && not (plantaoValido plantaoInvalido3)
+    && not (plantaoValido plantaoInvalido4)
+
+receituarioValidoOK :: Bool
+receituarioValidoOK =
+  receituarioValido receituario1 && receituarioValido receituario2
+    && not (receituarioValido receituarioInvalido1)
+    && not (receituarioValido receituarioInvalido2)
+    && not (receituarioValido receituarioInvalido3)
+    && not (receituarioValido receituarioInvalido4)
+
+conjuntoCasosTeste5' :: Bool
+conjuntoCasosTeste5' = planoValidoOK && receituarioValidoOK
+
+conjuntoCasosTeste6' :: Bool
+conjuntoCasosTeste6' = plantaoValidoOK
+
+-- plantaoInvalido1: Horário fora de ordem crescente
+-- plantaoInvalido2: Conflito entre Medicar e comprar [Medicar m1, Comprar m1 30]
+-- plantaoInvalido3: conflito entre medicar e comprar [Medicar m1, Comprar m1 30]
+-- plantaoInvalido4: Conflito entre Medicar e comprar [Comprar m1 20, Medicar m1, Medicar m4]
+-- plantaoInvalido4: Horários repetidos
+
+-- Ordem lexicográfica: m6, m9, m7, m1, m5, m2, m3, m4, m8
+
+
+

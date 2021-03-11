@@ -1,4 +1,4 @@
-module ModeloDados where
+module Trabalho1.ModeloDados where
 
 type Medicamento = String
 
@@ -16,11 +16,26 @@ type PlanoMedicamento = [(Horario, [Medicamento])]
 
 type Plantao = [(Horario, [Cuidado])]
 
+
+data Cuidado
+  = Comprar Medicamento Quantidade
+  | Medicar Medicamento
+
+
+
+instance Show Cuidado where
+  show (Comprar m q) = "Comprar " ++ Prelude.show q ++ " comprimido(s) do medicamento: " ++ m
+  show (Medicar m) = "Ministrar medicamento: " ++ m
+
+---- Minhas alterações ----
+
+-- Aquivo igual ao original
+
+{-
+
 data Cuidado
   = Comprar Medicamento Quantidade
   | Medicar Medicamento
   deriving (Eq)
 
-instance Show Cuidado where
-  show (Comprar m q) = "Comprar " ++ Prelude.show q ++ " comprimido(s) do medicamento: " ++ m
-  show (Medicar m) = "Ministrar medicamento: " ++ m
+-}
